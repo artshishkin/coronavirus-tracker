@@ -59,12 +59,12 @@ public class CoronaDataCsvParserService {
     }
 
     @SneakyThrows
-    @Scheduled(cron = "0 0/15 * * * *")
+//    @Scheduled(cron = "0 0/15 * * * *")
+    @Scheduled(cron = "0 0 * * * *")
     @Async
     public void fetchVirusData() {
         log.info("Corona Data - Fetching CSV data started");
         log.info("Application configuration: {}", appConfig);
-//        parseOneCSVVirusFile(CONFIRMED_VIRUS_DATA_URL, confirmedRepository, Confirmed.class);
         parseOneCSVVirusFile(appConfig.getConfirmedUrl(), confirmedRepository, Confirmed.class);
         parseOneCSVVirusFile(appConfig.getDeathsUrl(), deathsRepository, Deaths.class);
         parseOneCSVVirusFile(appConfig.getRecoveredUrl(), recoveredRepository, Recovered.class);
