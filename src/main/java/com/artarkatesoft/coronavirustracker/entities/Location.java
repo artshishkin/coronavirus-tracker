@@ -23,7 +23,6 @@ public class Location {
     private String provinceState;
 
     private String countryRegion;
-//    private Long population;
 
     @Column(name = "Lon")
     private double longitude;

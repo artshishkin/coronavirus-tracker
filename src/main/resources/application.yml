@@ -2,7 +2,18 @@ spring.application.name: Coronavirus analysis
 debug: false
 
 spring.jpa.hibernate.ddl-auto: update
-logging.level.org.hibernate.SQL: info
+
+# https://www.baeldung.com/hibernate-lazy-loading-workaround
+# https://vladmihalcea.com/the-hibernate-enable_lazy_load_no_trans-anti-pattern/
+spring.jpa.properties.hibernate.enable_lazy_load_no_trans: true
+
+logging.level:
+  org.hibernate.SQL: info
+  com.artarkatesoft: debug
+
+#logging:
+#  file:
+#    name: "logs/corona.log"
 
 management:
   endpoint.health.show-details: always
@@ -21,4 +32,6 @@ app:
   analysis.default-countries: "Italy,Spain,Germany,Poland,Romania,Slovakia,Hungary,Russia,Belarus,Moldova,Ukraine,US"
 
 
-spring.profiles.active: prod
+
+
+spring.profiles.active: dev

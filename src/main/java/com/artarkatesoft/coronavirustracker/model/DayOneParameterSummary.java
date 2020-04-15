@@ -14,4 +14,5 @@ import java.time.LocalDate;
 public class DayOneParameterSummary {
     private LocalDate date;
     private Integer count;
+    private Integer dayDelta;
 }

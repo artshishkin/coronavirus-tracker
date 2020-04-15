@@ -11,9 +11,12 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class DaySummary {
+public class PeriodSummary {
     private LocalDate date;
     private Integer confirmedCount;
+    private Integer confirmedDelta;
     private Integer deathsCount;
+    private Integer deathsDelta;
     private Integer recoveredCount;
+    private Integer recoveredDelta;
 }

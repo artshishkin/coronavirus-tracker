@@ -20,8 +20,10 @@ public class BaseDayDataEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+
     private LocalDate date;
     private Integer count;
+    private Integer dayDelta;
 
     @ManyToOne
     @JoinColumn(name = "location_id", referencedColumnName = "id", nullable = false)

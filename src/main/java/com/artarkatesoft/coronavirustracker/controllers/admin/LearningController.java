@@ -1,5 +1,6 @@
 package com.artarkatesoft.coronavirustracker.controllers.admin;
 
+import com.artarkatesoft.coronavirustracker.services.CoronaDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +16,19 @@ public class LearningController {
     private Environment environment;
 
     @GetMapping("envdetails")
-    public String getEnvironmentDetails(){
+    public String getEnvironmentDetails() {
         return environment.toString();
     }
+
+
+    @Autowired
+    private CoronaDataService coronaDataService;
+
+    @GetMapping("updateSummary")
+    public String updateSummary() {
+        coronaDataService.updateSummary();
+        return "Ok";
+    }
+
+
 }

@@ -1,19 +1,19 @@
 package com.artarkatesoft.coronavirustracker.controllers;
 
+import com.artarkatesoft.coronavirustracker.entities.CountrySummaryEntity;
+import com.artarkatesoft.coronavirustracker.model.CountryData;
 import com.artarkatesoft.coronavirustracker.model.CountryOneParameterData;
 import com.artarkatesoft.coronavirustracker.model.DayOneParameterSummary;
 import com.artarkatesoft.coronavirustracker.services.CoronaDataService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api")
 @RequiredArgsConstructor
 public class ApiController {
@@ -21,11 +21,11 @@ public class ApiController {
     private final CoronaDataService coronaDataService;
 
     @GetMapping("/country/{countryName}")
-    public Map<String,List<DayOneParameterSummary>> getAllDataByCountry(@PathVariable("countryName") String countryName) {
-        Map<String,List<DayOneParameterSummary>> result = new HashMap<>();
-        result.put("confirmed",coronaDataService.getCountryConfirmedHistory(countryName));
-        result.put("deaths",coronaDataService.getCountryDeathsHistory(countryName));
-        result.put("recovered",coronaDataService.getCountryRecoveredHistory(countryName));
+    public Map<String, List<DayOneParameterSummary>> getAllDataByCountry(@PathVariable("countryName") String countryName) {
+        Map<String, List<DayOneParameterSummary>> result = new HashMap<>();
+        result.put("confirmed", coronaDataService.getCountryConfirmedHistory(countryName));
+        result.put("deaths", coronaDataService.getCountryDeathsHistory(countryName));
+        result.put("recovered", coronaDataService.getCountryRecoveredHistory(countryName));
         return result;
     }
 
@@ -55,6 +55,40 @@ public class ApiController {
                 return coronaDataService.getDayPeriodSummariesOfCountry(countryName);
         }
         throw new RuntimeException("Not Found");
+    }
+
+
+    @GetMapping({"/countrydata/{period}/{countryName}"})
+    public CountryData getV2DayTable(@PathVariable String period, @PathVariable String countryName) {
+        CountryData data;
+        switch (period) {
+            case "day":
+                data = coronaDataService.getDayPeriodSummaryOfCountry(countryName).sortDateDescending();
+//                data = coronaDataService.getDayPeriodSummaryOfCountry(countryName);
+                break;
+            case "week":
+                data = coronaDataService.getWeekPeriodSummaryOfCountry(countryName).sortDateDescending();
+//                data = coronaDataService.getWeekPeriodSummaryOfCountry(countryName);
+                break;
+            default:
+                throw new IllegalArgumentException("Period must be day or week, but found " + period);
+        }
+        return data;
+    }
+
+    @GetMapping({"/countrysummary/{countryName}"})
+    public CountrySummaryEntity getCountrySummary(@PathVariable String countryName) {
+        return coronaDataService.getCountrySummary(countryName).orElseThrow(IllegalArgumentException::new);
+    }
+
+    @GetMapping({"/summary"})
+    public List<CountrySummaryEntity> getSummaryList() {
+        return coronaDataService.getSummaryList();
+    }
+
+    @GetMapping({"/countries"})
+    public List<String> getCountries() {
+        return coronaDataService.getAllCountries();
     }
 
 

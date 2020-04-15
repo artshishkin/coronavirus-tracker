@@ -15,6 +15,6 @@ public class DatabaseServicesInitializer {
     @PostConstruct
     public void init() {
         populationCsvParserService.fetchPopulationData();
-        coronaDataCsvParserService.fetchVirusData();
+        coronaDataCsvParserService.fetchVirusDataAsync();
     }
 }
