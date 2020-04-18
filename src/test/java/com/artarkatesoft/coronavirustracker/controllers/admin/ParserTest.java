@@ -16,12 +16,6 @@ class ParserTest {
         File file = parser.getFile();
         System.out.println(file);
         StringBuilder builder = new StringBuilder();
-
-
-
     }
 
-    @Test
-    void setFile() {
-    }
 }

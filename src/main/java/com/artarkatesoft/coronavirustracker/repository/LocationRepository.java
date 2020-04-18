@@ -14,6 +14,6 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
 
     //    List<Location> findAllByPopulationIsNull();
 
-    @Query("SELECT DISTINCT l.countryRegion FROM Location l WHERE l.countryRegion IS NOT EMPTY")
+    @Query("SELECT DISTINCT l.countryRegion FROM Location l WHERE l.countryRegion IS NOT EMPTY ORDER BY l.countryRegion")
     List<String> findAllCountries();
 }

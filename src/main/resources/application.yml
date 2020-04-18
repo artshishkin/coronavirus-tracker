@@ -11,9 +11,9 @@ logging.level:
   org.hibernate.SQL: info
   com.artarkatesoft: debug
 
-#logging:
-#  file:
-#    name: "logs/corona.log"
+logging:
+  file:
+    name: "logs/corona.log"
 
 management:
   endpoint.health.show-details: always

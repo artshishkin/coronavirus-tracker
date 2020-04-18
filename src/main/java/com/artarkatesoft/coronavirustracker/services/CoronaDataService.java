@@ -20,10 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -86,9 +83,13 @@ public class CoronaDataService {
         for (Location location : locations) {
 // TODO: 13.04.2020 org.hibernate.LazyInitializationException: failed to lazily initialize a collection of role: com.artarkatesoft.coronavirustracker.entities.Location.confirmedList, could not initialize proxy - no Session
             List<? extends BaseDayDataEntity> dayDataEntityList = func.apply(location);
+
+            if (dayDataEntityList == null || dayDataEntityList.isEmpty()) continue;
+            dayDataEntityList.sort(Comparator.comparing(BaseDayDataEntity::getDate));
+
 // TODO: 26.03.2020 Change Algo -> may be use TreeMap<LocalDate, DayOneParameterSummary> to store one day summary
             if (dayOneParameterSummaryList == null) {
-                if (dayDataEntityList == null || dayDataEntityList.isEmpty()) continue;
+
                 dayOneParameterSummaryList = dayDataEntityList.stream().map(dayData -> DayOneParameterSummary.builder()
                         .date(dayData.getDate())
                         .count(dayData.getCount())
@@ -151,13 +152,14 @@ public class CoronaDataService {
         List<PeriodSummary> periodSummaryList = new ArrayList<>();
 
         DayOneParameterSummary confirmedSummary;
-        DayOneParameterSummary deathsSummary = new DayOneParameterSummary(LocalDate.now(), 0, 0);;
+        DayOneParameterSummary deathsSummary = new DayOneParameterSummary(LocalDate.now(), 0, 0);
+        ;
         DayOneParameterSummary recoveredSummary = new DayOneParameterSummary(LocalDate.now(), 0, 0);
         for (int i = 0; i < countryConfirmedHistory.size(); i++) {
             confirmedSummary = countryConfirmedHistory.get(i);
             try {
                 deathsSummary = countryDeathsHistory.get(i);
-            }catch(IndexOutOfBoundsException e){
+            } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
                 deathsSummary.setDate(confirmedSummary.getDate());
             }
@@ -168,7 +170,9 @@ public class CoronaDataService {
             else {
                 recoveredSummary.setDate(confirmedSummary.getDate());
             }
-
+// TODO: 17.04.2020 Test if do not match
+            if (!confirmedSummary.getDate().equals(deathsSummary.getDate()) || !recoveredSummary.getDate().equals(deathsSummary.getDate()))
+                throw new RuntimeException("Dates of confirmed, recovered and deaths do not match!!!");
 
             assert confirmedSummary.getDate().equals(deathsSummary.getDate());
             assert recoveredSummary.getDate().equals(deathsSummary.getDate());
@@ -209,7 +213,7 @@ public class CoronaDataService {
     @Value("${debug}")
     private boolean isDebug;
 
-//    @Transactional(readOnly = true)
+    //    @Transactional(readOnly = true)
 //    @Transactional
     public void updateSummary() {
         List<String> allCountries = self.getAllCountries();
@@ -245,15 +249,16 @@ public class CoronaDataService {
             }
             log.debug("Time execution of create/update data of {} is {}ms", country, System.currentTimeMillis() - start);
 
-            if(isDebug) System.out.println("--------------------");
+            if (isDebug) System.out.println("--------------------");
         }
         countrySummaryRepository.saveAll(countrySummaryEntityList);
     }
 
-    public List<CountrySummaryEntity> getSummaryList(){
+    public List<CountrySummaryEntity> getSummaryList() {
         return countrySummaryRepository.findAll();
     }
-    public Optional<CountrySummaryEntity> getCountrySummary(String countryName){
+
+    public Optional<CountrySummaryEntity> getCountrySummary(String countryName) {
         return countrySummaryRepository.findByCountry(countryName);
     }
 }

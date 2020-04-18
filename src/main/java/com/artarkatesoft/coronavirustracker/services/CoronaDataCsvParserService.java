@@ -57,6 +57,7 @@ public class CoronaDataCsvParserService {
     private final ConfirmedRepository confirmedRepository;
     private final DeathsRepository deathsRepository;
     private final RecoveredRepository recoveredRepository;
+    private final DataCsvHashRepository dataCsvHashRepository;
 
 
     private CoronaDataService coronaDataService;
@@ -109,11 +110,26 @@ public class CoronaDataCsvParserService {
         }
 
         int hashCode = fileContent.hashCode();
-        if (lastHashCodeMap == null) lastHashCodeMap = new HashMap<>();
 
-        if (Objects.equals(lastHashCodeMap.get(dataUrl), hashCode)) return changed;
+        Optional<DataCsvHash> dataCsvHashOptional = dataCsvHashRepository.findByDataUrl(dataUrl);
 
-        lastHashCodeMap.put(dataUrl, hashCode);
+        DataCsvHash dataCsvHash = dataCsvHashOptional.
+                orElse(DataCsvHash.builder().dataUrl(dataUrl).build());
+//        DataCsvHash dataCsvHash = dataCsvHashOptional.
+//                orElseGet(() -> dataCsvHashRepository.save(DataCsvHash.builder().dataUrl(dataUrl).build()));
+
+
+//
+//        if (lastHashCodeMap == null) lastHashCodeMap = new HashMap<>();
+//
+//        if (Objects.equals(lastHashCodeMap.get(dataUrl), hashCode)) return changed;
+//
+//        lastHashCodeMap.put(dataUrl, hashCode);
+
+
+        if (Objects.equals(dataCsvHash.getFileHash(), hashCode)) return changed;
+
+        dataCsvHash.setFileHash(hashCode);
 
         log.info("Corona Data - Started parsing data from {}", dataUrl);
 
@@ -197,7 +213,7 @@ public class CoronaDataCsvParserService {
 
                     if (optionalDayData.isPresent()) {
                         BaseDayDataEntity entity = (BaseDayDataEntity) optionalDayData.get();
-                        if (entity.getCount() != currentCount) {
+                        if (entity.getCount() != currentCount || entity.getDayDelta() != delta) {
 
                             BeanUtils.copyProperties(baseDayData, entity, "id");
                             listToSaveAtOnce.add(entity);
@@ -235,6 +251,9 @@ public class CoronaDataCsvParserService {
         if (!listToSaveAtOnce.isEmpty()) {
             repository.saveAll(listToSaveAtOnce);
         }
+
+        dataCsvHashRepository.save(dataCsvHash);
+
         return true;
     }
 }
