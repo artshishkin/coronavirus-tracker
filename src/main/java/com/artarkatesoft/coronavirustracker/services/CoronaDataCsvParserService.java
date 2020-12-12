@@ -1,8 +1,8 @@
 package com.artarkatesoft.coronavirustracker.services;
 
-import com.artarkatesoft.coronavirustracker.aop.LogExecutionTime;
 import com.artarkatesoft.coronavirustracker.configuration.AppConfig;
-import com.artarkatesoft.coronavirustracker.entities.*;
+import com.artarkatesoft.coronavirustracker.entities.DataCsvHash;
+import com.artarkatesoft.coronavirustracker.entities.Location;
 import com.artarkatesoft.coronavirustracker.entities.daydata.BaseDayDataEntity;
 import com.artarkatesoft.coronavirustracker.entities.daydata.Confirmed;
 import com.artarkatesoft.coronavirustracker.entities.daydata.Deaths;
@@ -14,10 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,8 +24,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -35,9 +31,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.regex.Matcher;
-
-import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.exact;
 
 @Slf4j
 @Service
@@ -153,13 +146,25 @@ public class CoronaDataCsvParserService {
 //                .withIgnoreNullValues()
 //                .withIgnorePaths("count", "dayDelta");
 
+
         for (CSVRecord record : records) {
 //            String id = record.get("ID");
+
+
+            double lat = 0;
+            double longitude = 0;
+            try {
+                longitude = Double.parseDouble(record.get("Long"));
+                lat = Double.parseDouble(record.get("Lat"));
+            } catch (NumberFormatException e) {
+                log.debug("Coordinates error for record {}", record, e);
+            }
+
             Location location = Location.builder()
                     .provinceState(record.get(0))
                     .countryRegion(record.get(1))
-                    .latitude(Double.parseDouble(record.get("Lat")))
-                    .longitude(Double.parseDouble(record.get("Long")))
+                    .latitude(lat)
+                    .longitude(longitude)
                     .build();
 
 //            location = locationRepository.findOne(Example.of(location)).orElse(locationRepository.save(location));

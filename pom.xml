@@ -16,6 +16,8 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<docker.image.prefix>artarkatesoft</docker.image.prefix>
+		<docker.image.name>coronavirus-tracker</docker.image.name>
 	</properties>
 
 	<dependencies>
@@ -94,6 +96,45 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.33.0</version>
+				<configuration>
+					<!--                    <dockerHost>unix:///var/run/docker.sock</dockerHost>-->
+					<dockerHost>http://dockerapp.shyshkin.net:2375</dockerHost>
+					<!--					<dockerHost>http://192.168.1.41:2375</dockerHost>-->
+					<verbose>true</verbose>
+					<images>
+						<image>
+							<name>${docker.image.prefix}/${docker.image.name}</name>
+							<build>
+								<dockerFileDir>${project.basedir}/src/main/docker/</dockerFileDir>
+								<!-- Copies artifact to docker build dir in target -->
+								<assembly>
+									<descriptorRef>artifact</descriptorRef>
+								</assembly>
+								<tags>
+									<tag>latest</tag>
+									<tag>${project.version}</tag>
+								</tags>
+							</build>
+							<run>
+								<ports>
+									<post>8080:8080</post>
+								</ports>
+								<env>
+									<JASYPT_ENCRYPTOR_PASSWORD>jasypt_password</JASYPT_ENCRYPTOR_PASSWORD>
+								</env>
+								<restartPolicy>
+									<name>always</name>
+								</restartPolicy>
+							</run>
+						</image>
+					</images>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
