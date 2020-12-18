@@ -1,9 +1,10 @@
 package com.artarkatesoft.coronavirustracker.services;
 
+import com.amazonaws.xray.spring.aop.XRayEnabled;
 import com.artarkatesoft.coronavirustracker.entities.CountrySummaryEntity;
-import com.artarkatesoft.coronavirustracker.entities.daydata.BaseDayDataEntity;
 import com.artarkatesoft.coronavirustracker.entities.Location;
 import com.artarkatesoft.coronavirustracker.entities.PopulationWorldBank;
+import com.artarkatesoft.coronavirustracker.entities.daydata.BaseDayDataEntity;
 import com.artarkatesoft.coronavirustracker.model.CountryData;
 import com.artarkatesoft.coronavirustracker.model.CountryOneParameterData;
 import com.artarkatesoft.coronavirustracker.model.DayOneParameterSummary;
@@ -17,10 +18,12 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,6 +31,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@XRayEnabled
 public class CoronaDataService {
     private final LocationRepository locationRepository;
     private final PopulationWorldBankRepository populationWorldBankRepository;
