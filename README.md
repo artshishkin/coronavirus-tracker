@@ -3,6 +3,9 @@
 
 # Coronavirus tracker
 
+[springver]: https://img.shields.io/badge/dynamic/xml?label=Spring%20Boot&query=%2F%2A%5Blocal-name%28%29%3D%27project%27%5D%2F%2A%5Blocal-name%28%29%3D%27parent%27%5D%2F%2A%5Blocal-name%28%29%3D%27version%27%5D&url=https%3A%2F%2Fraw.githubusercontent.com%2Fartshishkin%2Fart-spring-core-devops-aws%2Fmaster%2Fpom.xml&logo=Spring&labelColor=white&color=grey
+[licence]: https://img.shields.io/github/license/artshishkin/art-spring-core-devops-aws.svg
+
 ## Tutorial from Java Brains (Udemy)
 
 ### Modified by SHyshkin Artem 
@@ -68,5 +71,40 @@
 </restartPolicy>
 ```
     
-[springver]: https://img.shields.io/badge/dynamic/xml?label=Spring%20Boot&query=%2F%2A%5Blocal-name%28%29%3D%27project%27%5D%2F%2A%5Blocal-name%28%29%3D%27parent%27%5D%2F%2A%5Blocal-name%28%29%3D%27version%27%5D&url=https%3A%2F%2Fraw.githubusercontent.com%2Fartshishkin%2Fart-spring-core-devops-aws%2Fmaster%2Fpom.xml&logo=Spring&labelColor=white&color=grey
-[licence]: https://img.shields.io/github/license/artshishkin/art-spring-core-devops-aws.svg
+#####  Adding ability to debug application using AWS X-Ray
+
+######  Start AWS XRay Daemon
+
+    -  native for Linux, osX or Windows
+    -  **or**
+    -  start docker image
+    
+```shell script
+docker pull amazon/aws-xray-daemon
+```
+
+For Linux
+
+```shell script
+docker run \
+      --attach STDOUT \
+      -v ~/.aws/:/root/.aws/:ro \
+      --net=host \
+      -e AWS_REGION=eu-west-3 \
+      --name xray-daemon \
+      -p 2000:2000/udp \
+      amazon/aws-xray-daemon -o
+```
+On Windows Power Shell
+
+```shell script
+docker run --attach STDOUT -v C:\Users\Admin\.aws:/root/.aws/:ro -e AWS_REGION=eu-west-3 --name xray-daemon -p 2000:2000/udp amazon/aws-xray-daemon -o
+```
+
+######  Configure SDK for XRay
+
+-  [Tracing incoming requests with the X-Ray SDK for Java](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-java-filters.html)
+-  [AOP with Spring and the X-Ray SDK for Java](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-java-aop-spring.html) for AWS XRay.
+
+
+    

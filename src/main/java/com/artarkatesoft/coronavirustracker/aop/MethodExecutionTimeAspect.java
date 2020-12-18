@@ -5,8 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
@@ -36,16 +34,16 @@ public class MethodExecutionTimeAspect {
     @Around("execution(* com.artarkatesoft.coronavirustracker.services.*.*(..)) || @annotation(LogExecutionTime)")
     public Object calculateExecutionTime2(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
-        log.info("Entry in method {}",joinPoint);
+        log.trace("Entry in method {}", joinPoint);
         Object[] args = joinPoint.getArgs();
         Object result = joinPoint.proceed();
         long timeTaken = System.currentTimeMillis() - startTime;
         if (args.length > 5 || (args.length >= 1 && args[0] instanceof List && ((List) (args[0])).size() > 5))
-            log.info("Time Taken by {} is {} ms. Arguments count:{}.", joinPoint, timeTaken, args.length);
+            log.trace("Time Taken by {} is {} ms. Arguments count:{}.", joinPoint, timeTaken, args.length);
         else if (args.length == 0)
-            log.info("Time Taken by {} is {} ms.", joinPoint, timeTaken);
+            log.trace("Time Taken by {} is {} ms.", joinPoint, timeTaken);
         else
-            log.info("Time Taken by {} is {} ms. Arguments count:{}. Arguments are {}", joinPoint, timeTaken, args.length, args);
+            log.trace("Time Taken by {} is {} ms. Arguments count:{}. Arguments are {}", joinPoint, timeTaken, args.length, args);
         return result;
     }
 
