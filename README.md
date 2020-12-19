@@ -98,7 +98,7 @@ docker run \
 On Windows Power Shell
 
 ```shell script
-docker run --attach STDOUT -v C:\Users\Admin\.aws:/root/.aws/:ro -e AWS_REGION=eu-west-3 --name xray-daemon -p 2000:2000/udp amazon/aws-xray-daemon -o
+docker run --attach STDOUT -v C:\Users\Admin\.aws:/root/.aws/:ro -e AWS_REGION=eu-west-3 --name xray-daemon -p 2000:2000/udp -p 2000:2000/tcp amazon/aws-xray-daemon -o
 ```
 
 ######  Configure SDK for XRay
