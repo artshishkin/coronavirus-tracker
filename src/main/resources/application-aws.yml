@@ -3,7 +3,7 @@ spring:
   thymeleaf:
     enabled: true
 
-debug: true
+#debug: true
 logging:
   level:
     com.amazonaws: trace
