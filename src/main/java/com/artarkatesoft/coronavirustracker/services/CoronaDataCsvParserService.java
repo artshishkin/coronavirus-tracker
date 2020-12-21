@@ -51,14 +51,7 @@ public class CoronaDataCsvParserService {
     private final DeathsRepository deathsRepository;
     private final RecoveredRepository recoveredRepository;
     private final DataCsvHashRepository dataCsvHashRepository;
-
-
-    private CoronaDataService coronaDataService;
-
-    @Autowired
-    public void setCoronaDataService(CoronaDataService coronaDataService) {
-        this.coronaDataService = coronaDataService;
-    }
+    private final SummaryCalculationService summaryCalculationService;
 
     private AppConfig appConfig;
 
@@ -77,15 +70,14 @@ public class CoronaDataCsvParserService {
 //    @Scheduled(cron = "0 0/10 * * * *")
     @Scheduled(cron = "0 0 * * * *")
     public void fetchVirusData() {
-        log.info("Corona Data - Fetching CSV data started");
-        log.info("Application configuration: {}", appConfig);
+        log.debug("Corona Data - Fetching CSV data started");
         boolean needToUpdate = false;
         needToUpdate |= parseOneCSVVirusFile(appConfig.getConfirmedUrl(), confirmedRepository, Confirmed.class);
         needToUpdate |= parseOneCSVVirusFile(appConfig.getDeathsUrl(), deathsRepository, Deaths.class);
         needToUpdate |= parseOneCSVVirusFile(appConfig.getRecoveredUrl(), recoveredRepository, Recovered.class);
 
         if (needToUpdate)
-            coronaDataService.updateSummary();
+            summaryCalculationService.updateSummary();
 
         log.info("Corona Data - Fetching CSV data finished");
     }
