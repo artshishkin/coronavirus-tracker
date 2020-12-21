@@ -1,5 +1,9 @@
 package com.artarkatesoft.coronavirustracker.controllers;
 
+import com.amazonaws.xray.AWSXRay;
+import com.amazonaws.xray.AWSXRayRecorder;
+import com.amazonaws.xray.entities.Entity;
+import com.amazonaws.xray.entities.Subsegment;
 import com.artarkatesoft.coronavirustracker.model.CountryOneParameterData;
 import com.artarkatesoft.coronavirustracker.model.DayOneParameterSummary;
 import com.artarkatesoft.coronavirustracker.repository.PopulationWorldBankRepository;
@@ -9,7 +13,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -22,6 +25,8 @@ import java.util.stream.Collectors;
 public class ChartController {
 
     private final CoronaDataService coronaDataService;
+
+    private final AWSXRayRecorder recorder = AWSXRay.getGlobalRecorder();
 
     // TODO: 20.03.2020 move this repo to service layer
     private final PopulationWorldBankRepository populationWorldBankRepository;
@@ -80,8 +85,18 @@ public class ChartController {
 
         Object[][] data = null;
 
-        List<CountryOneParameterData> sortedDataList = countryList.stream()
-                .map(coronaDataService::getDayPeriodSummariesOfCountry)
+        Entity segment = recorder.getTraceEntity();
+
+        List<CountryOneParameterData> sortedDataList = countryList
+                .stream()
+                .parallel()
+                .map(countryName -> {
+                    recorder.setTraceEntity(segment);
+                    Subsegment subsegment = AWSXRay.beginSubsegment("## Get Day Period Summaries Of " + countryName);
+                    CountryOneParameterData summaries = coronaDataService.getDayPeriodSummariesOfCountry(countryName);
+                    AWSXRay.endSubsegment();
+                    return summaries;
+                })
                 .sorted()
                 .collect(Collectors.toList());
 
@@ -163,7 +178,7 @@ public class ChartController {
             }
             data[0][countryIndex + 1] = country;
 
-            if (dayOneParameterSummaryList==null || dayOneParameterSummaryList.isEmpty()) continue;
+            if (dayOneParameterSummaryList == null || dayOneParameterSummaryList.isEmpty()) continue;
             for (int summaryIndex = 0; summaryIndex < dayOneParameterSummaryList.size(); summaryIndex++) {
                 DayOneParameterSummary dayOneParameterSummary = dayOneParameterSummaryList.get(summaryIndex);
                 LocalDate date = dayOneParameterSummary.getDate();

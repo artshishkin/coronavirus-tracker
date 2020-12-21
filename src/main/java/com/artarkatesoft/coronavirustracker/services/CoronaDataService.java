@@ -56,6 +56,7 @@ public class CoronaDataService {
     }
 
     public CountryOneParameterData getDayPeriodSummariesOfCountry(String countryName) {
+        log.debug("getDayPeriodSummariesOfCountry ({})", countryName);
         return new CountryOneParameterData(countryName, getPopulationOfCountry(countryName), getCountryConfirmedHistory(countryName));
     }
 
