@@ -6,5 +6,7 @@ spring:
 #debug: true
 logging:
   level:
-    com.amazonaws: trace
-    com.amazonaws.xray.spring.aop.AbstractXRayInterceptor: debug
+    com.amazonaws: info
+#    com.amazonaws: trace
+    com.amazonaws.xray.spring.aop.AbstractXRayInterceptor: info
+#    com.amazonaws.xray.spring.aop.AbstractXRayInterceptor: debug

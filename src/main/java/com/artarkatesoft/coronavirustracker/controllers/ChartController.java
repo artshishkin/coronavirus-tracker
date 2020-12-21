@@ -124,7 +124,6 @@ public class ChartController {
                 Integer count = dayOneParameterSummary.getCount();
                 data[summaryIndex + 1][countryIndex + 1] = count;
             }
-
         }
 
         setNullElementsToZero(data);
@@ -153,13 +152,27 @@ public class ChartController {
         } else
             countryList = Arrays.asList(countries.split(";"));
 
+        Entity segment = recorder.getTraceEntity();
+
         Object[][] data = null;
         CountryOneParameterData.PercentageOfPopulationComparator percentageOfPopulationComparator =
                 new CountryOneParameterData.PercentageOfPopulationComparator();
-        List<CountryOneParameterData> sortedDataList = countryList.stream()
+        List<CountryOneParameterData> sortedDataList = countryList
+                .parallelStream()
+                .peek(country -> recorder.setTraceEntity(segment))
                 .map(coronaDataService::getDayPeriodSummariesOfCountry)
                 .sorted(percentageOfPopulationComparator)
                 .collect(Collectors.toList());
+
+        Subsegment subsegment = AWSXRay.beginSubsegment("## Form 2D Data Array for JS Graphs ");
+
+        int countrySize = sortedDataList.size();
+        int summarySize = sortedDataList.get(0).getDayOneParameterSummaryList().size();
+        data = new Object[summarySize + 1][countrySize + 1];
+
+        data[0][0] = "Date";
+        fillDateColumn(data, sortedDataList.get(0));
+
 // TODO: 20.03.2020 if name of country is wrong
         for (int countryIndex = 0; countryIndex < sortedDataList.size(); countryIndex++) {
             CountryOneParameterData countryOneParameterData = sortedDataList.get(countryIndex);
@@ -169,27 +182,32 @@ public class ChartController {
 
             Long population = countryOneParameterData.getPopulation();
 
-            if (data == null) {
-                int countrySize = sortedDataList.size();
-                int summarySize = dayOneParameterSummaryList.size();
-                data = new Object[summarySize + 1][countrySize + 1];
-
-                data[0][0] = "Date";
-            }
             data[0][countryIndex + 1] = country;
 
             if (dayOneParameterSummaryList == null || dayOneParameterSummaryList.isEmpty()) continue;
             for (int summaryIndex = 0; summaryIndex < dayOneParameterSummaryList.size(); summaryIndex++) {
                 DayOneParameterSummary dayOneParameterSummary = dayOneParameterSummaryList.get(summaryIndex);
-                LocalDate date = dayOneParameterSummary.getDate();
-                data[summaryIndex + 1][0] = date;
+
                 Integer count = dayOneParameterSummary.getCount();
-//                data[summaryIndex + 1][countryIndex + 1] = (population == null) ? 10L*count : 1_000_000_000L * count / population;
                 data[summaryIndex + 1][countryIndex + 1] = (population == null) ? 0.1 * count : 1000000.0 * count / population;
             }
         }
         setNullElementsToZero(data);
+
+        AWSXRay.endSubsegment(subsegment);
+
         model.addAttribute("data", data);
         return "chart2";
+    }
+
+    private void fillDateColumn(Object[][] data, CountryOneParameterData countryOneParameterData) {
+
+        List<DayOneParameterSummary> dayOneParameterSummaryList = countryOneParameterData.getDayOneParameterSummaryList();
+
+        for (int summaryIndex = 0; summaryIndex < dayOneParameterSummaryList.size(); summaryIndex++) {
+            DayOneParameterSummary dayOneParameterSummary = dayOneParameterSummaryList.get(summaryIndex);
+            LocalDate date = dayOneParameterSummary.getDate();
+            data[summaryIndex + 1][0] = date;
+        }
     }
 }
